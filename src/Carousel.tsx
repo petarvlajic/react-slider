@@ -13,6 +13,8 @@ const Carousel: React.FC<Props> = ({ CarouselItems }) => {
   const [carouselData, setCarouselData] =
     useState<CarouselItem[]>(CarouselItems);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const carouselDataRef = useRef(carouselData);
   const [carouselInView, setCarouselInView] = useState<number[]>([
     1, 2, 3, 4, 5,
@@ -24,10 +26,6 @@ const Carousel: React.FC<Props> = ({ CarouselItems }) => {
   );
 
   useEffect(() => {
-    setupCarousel();
-  }, []);
-
-  useEffect(() => {
     updateCarouselView();
 
     carouselDataRef.current = carouselData;
@@ -35,33 +33,11 @@ const Carousel: React.FC<Props> = ({ CarouselItems }) => {
     carouselInViewRef.current = carouselInView;
   }, [carouselData]);
 
-  const setupCarousel = () => {
-    const container = document.createElement("div");
-    const controls = document.createElement("div");
-
-    document.querySelector(".carousel")?.append(container, controls);
-    container.className = "carousel-container";
-    controls.className = "carousel-controls";
-
-    carouselData.forEach((item, index) => {
-      const carouselItem = item.src
-        ? document.createElement("img")
-        : document.createElement("div");
-      container.append(carouselItem);
-
-      carouselItem.className = `carousel-item carousel-item-${index + 1}`;
-      carouselItem.src = item.src;
-      carouselItem.setAttribute("loading", "lazy");
-      carouselItem.setAttribute("data-index", `${index + 1}`);
-    });
-  };
-
   const updateCarouselView = () => {
     carouselInViewRef?.current?.forEach((item, index) => {
-      const container = document.querySelector(".carousel-container");
-      if (!container) return;
-      if (container.children[index]) {
-        container.children[
+      if (!containerRef.current) return;
+      if (containerRef.current.children[index]) {
+        containerRef.current.children[
           index
         ].className = `carousel-item carousel-item-${item}`;
       }
@@ -112,15 +88,15 @@ const Carousel: React.FC<Props> = ({ CarouselItems }) => {
   return (
     <div className="">
       <div className="carousel">
-        {/* <div className="carousel-container">
-          {carouselDataRef.current.map((slide, index) => {
+        <div className="carousel-container" ref={containerRef}>
+          {CarouselItems.map((slide, index) => {
             return (
               <div className={`carousel-item carousel-item-${index + 1}`}>
                 <img src={slide.src} alt="" loading="lazy" />
               </div>
             );
           })}
-        </div> */}
+        </div>
         <div className="carousel-controls">
           <button
             className="carousel-control carousel-control-previous"
